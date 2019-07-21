@@ -19,7 +19,6 @@ import org.openqa.selenium.WebElement;
 public class ByXDomPath extends By implements Serializable {
 
     private final String xpathExpression;
-    private static boolean xdomPathEngineReady = false;
 
     public ByXDomPath(String xpathExpression) {
         if (xpathExpression == null) {
@@ -48,16 +47,20 @@ public class ByXDomPath extends By implements Serializable {
     }
 
     private void checkAndPopulateXdomPathEngine(WebDriver driver) {
-        if (!xdomPathEngineReady) {
+        if (!isXdomPathReady(driver)) {
             try {
                 String script = readXdomPathScript();
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 js.executeScript(script);
-                xdomPathEngineReady = true;
             } catch (Exception ex) {
                 Logger.getLogger(ByXDomPath.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+    }
+    
+    private Boolean isXdomPathReady(WebDriver driver) {
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        return (Boolean) js.executeScript("return !!window.XDomPath");
     }
 
     private String readXdomPathScript() throws Exception {
